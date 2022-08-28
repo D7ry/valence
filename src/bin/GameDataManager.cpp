@@ -10,7 +10,7 @@ void GameDataManager::negateWardCost()
 	
 	auto& spells = data->GetFormArray<RE::SpellItem>();
 	
-
+	logger::info("Re-adjusting ward magicka costs...");
 	auto it = spells.begin();
 	while (it != spells.end()) {
 		RE::SpellItem*& spell = *it;
@@ -23,7 +23,7 @@ void GameDataManager::negateWardCost()
 					if (effectSetting) {
 						auto data = &effectSetting->data;
 						if (data->primaryAV == RE::ActorValue::kWardPower) {
-							logger::info("{}", spell->GetName());
+							logger::info("Overriding cost: {}", spell->GetName());
 							spell->data.costOverride = 0;
 							spell->data.flags.set(RE::SpellItem::SpellFlag::kCostOverride);
 						}

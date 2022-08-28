@@ -1,6 +1,7 @@
 #pragma once
 #include "SKSE/Trampoline.h"
 #include "PCH.h"
+#include "Utils.h"
 namespace Hooks
 {
 	class h_MoveObjectRefrHavok
@@ -31,10 +32,49 @@ namespace Hooks
 			
 	};
 
+	class h_MeleeCollision
+	{
+	public:
+		static void install()
+		{
+			logger::info("h_MeleeCollision");
+			REL::Relocation<uintptr_t> hook{ RELOCATION_ID(37650, 38603) };  //SE:627930 + 38B AE:64D350 +  45A
+			auto& trampoline = SKSE::GetTrampoline();
+
+			_ProcessHit = trampoline.write_call<5>(hook.address() + RELOCATION_OFFSET(0x38B, 0x45A), processHit);
+		}
+
+	private:
+
+		static void processHit(RE::Actor* a_aggressor, RE::Actor* a_victim, std::int64_t a_int1, bool a_bool, void* a_unkptr) {
+			RE::SpellItem* ward = Utils::getCastingWard(a_victim);
+			if (ward) {
+				logger::info("{} is casting ward", a_victim->GetName());
+				RE::HitData hitData;
+				hitData.Populate(a_aggressor, a_victim, a_aggressor->GetAttackingWeapon());
+				float damage = hitData.totalDamage;
+				if (damage > Utils::getWardPower(a_victim)) {
+					Utils::modWardPower(a_victim, damage);
+					a_aggressor->NotifyAnimationGraph("recoillargestart");
+					return;
+				} else {
+					logger::info("not enough ward power to block");
+					Utils::modWardPower(a_victim, damage);
+					//a_victim->NotifyAnimationGraph("staggerStart");
+				}
+			}
+			_ProcessHit(a_aggressor, a_victim, a_int1, a_bool, a_unkptr);
+		}
+
+		static inline REL::Relocation<decltype(processHit)> _ProcessHit;
+	};
+
 	void install() 
 	{
 		logger::info("hooking...");
-		h_MoveObjectRefrHavok::install();
+		SKSE::AllocTrampoline(1 << 5);
+		//h_MoveObjectRefrHavok::install();
+		h_MeleeCollision::install();
 		logger::info("...success");
 	}
 }

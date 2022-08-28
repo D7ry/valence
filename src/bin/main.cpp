@@ -1,5 +1,5 @@
 #include "GameDataManager.h"
-
+#include "Hooks.h"
 
 
 
@@ -19,6 +19,7 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 
 void onSKSEInit()
 {
+	Hooks::install();
 }
 
 namespace
