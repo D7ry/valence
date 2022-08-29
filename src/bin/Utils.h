@@ -1,5 +1,6 @@
 #pragma once
 #include "PCH.h"
+#include "GameDataManager.h"
 namespace Utils
 {
 	inline bool isEffectWardPower(RE::EffectSetting* a_effectSetting) {
@@ -36,7 +37,7 @@ namespace Utils
 			}
 			
 		}
-		return false;
+		return nullptr;
 	}
 
 	inline float getWardPower(RE::Actor* a_actor) {
@@ -50,5 +51,7 @@ namespace Utils
 	inline void modWardPower(RE::Actor* a_actor, float a_mod) {
 		a_actor->ModActorValue(RE::ActorValue::kWardPower, a_mod);
 	}
+
+	
 
 }

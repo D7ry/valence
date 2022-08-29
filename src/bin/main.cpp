@@ -8,11 +8,11 @@ void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
 		GameDataManager::negateWardCost();
+		GameDataManager::GetSingleton()->_cachedGameSettings.cache();
 		break;
 	case SKSE::MessagingInterface::kPostLoad:
 		break;
 	case SKSE::MessagingInterface::kPostLoadGame:
-		GameDataManager::negateWardCost();
 		break;
 	}
 }

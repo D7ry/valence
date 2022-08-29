@@ -34,3 +34,22 @@ void GameDataManager::negateWardCost()
 		it++;
 	}
 }
+
+void GameDataManager::gameSettings::cache() {
+	auto settings = RE::GameSettingCollection::GetSingleton();
+	fDiffMultHPByPCVE = settings->GetSetting("fDiffMultHPByPCVE")->GetFloat();
+	fDiffMultHPByPCE = settings->GetSetting("fDiffMultHPByPCE")->GetFloat();
+	fDiffMultHPByPCN = settings->GetSetting("fDiffMultHPByPCN")->GetFloat();
+	fDiffMultHPByPCH = settings->GetSetting("fDiffMultHPByPCH")->GetFloat();
+	fDiffMultHPByPCVH = settings->GetSetting("fDiffMultHPByPCVH")->GetFloat();
+	fDiffMultHPByPCL = settings->GetSetting("fDiffMultHPByPCL")->GetFloat();
+
+	fDiffMultHPToPCVE = settings->GetSetting("fDiffMultHPToPCVE")->GetFloat();
+	fDiffMultHPToPCE = settings->GetSetting("fDiffMultHPToPCE")->GetFloat();
+	fDiffMultHPToPCN = settings->GetSetting("fDiffMultHPToPCN")->GetFloat();
+	fDiffMultHPToPCH = settings->GetSetting("fDiffMultHPToPCH")->GetFloat();
+	fDiffMultHPToPCVH = settings->GetSetting("fDiffMultHPToPCVH")->GetFloat();
+	fDiffMultHPToPCL = settings->GetSetting("fDiffMultHPToPCL")->GetFloat();
+
+	fCombatHitConeAngle = settings->GetSetting("fCombatHitConeAngle")->GetFloat();
+}

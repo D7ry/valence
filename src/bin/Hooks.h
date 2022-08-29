@@ -41,12 +41,12 @@ namespace Hooks
 			REL::Relocation<uintptr_t> hook{ RELOCATION_ID(37650, 38603) };  //SE:627930 + 38B AE:64D350 +  45A
 			auto& trampoline = SKSE::GetTrampoline();
 
-			_ProcessHit = trampoline.write_call<5>(hook.address() + RELOCATION_OFFSET(0x38B, 0x45A), processHit);
+			_processMeleeCollision = trampoline.write_call<5>(hook.address() + RELOCATION_OFFSET(0x38B, 0x45A), processMeleeCollision);
 		}
 
 	private:
 
-		static void processHit(RE::Actor* a_aggressor, RE::Actor* a_victim, std::int64_t a_int1, bool a_bool, void* a_unkptr) {
+		static void processMeleeCollision(RE::Actor* a_aggressor, RE::Actor* a_victim, std::int64_t a_int1, bool a_bool, void* a_unkptr) {
 			RE::SpellItem* ward = Utils::getCastingWard(a_victim);
 			if (ward) {
 				logger::info("{} is casting ward", a_victim->GetName());
@@ -63,10 +63,10 @@ namespace Hooks
 					//a_victim->NotifyAnimationGraph("staggerStart");
 				}
 			}
-			_ProcessHit(a_aggressor, a_victim, a_int1, a_bool, a_unkptr);
+			_processMeleeCollision(a_aggressor, a_victim, a_int1, a_bool, a_unkptr);
 		}
 
-		static inline REL::Relocation<decltype(processHit)> _ProcessHit;
+		static inline REL::Relocation<decltype(processMeleeCollision)> _processMeleeCollision;
 	};
 
 	void install() 
