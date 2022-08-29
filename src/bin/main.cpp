@@ -1,16 +1,16 @@
 #include "GameDataManager.h"
 #include "Hooks.h"
-
-
+#include "APIManager.h"
 
 void MessageHandler(SKSE::MessagingInterface::Message* a_msg)
 {
 	switch (a_msg->type) {
 	case SKSE::MessagingInterface::kDataLoaded:
 		GameDataManager::negateWardCost();
-		GameDataManager::GetSingleton()->_cachedGameSettings.cache();
+		Utils::init();
 		break;
 	case SKSE::MessagingInterface::kPostLoad:
+		APIManager::GetSingleton()->init();
 		break;
 	case SKSE::MessagingInterface::kPostLoadGame:
 		break;

@@ -3,7 +3,7 @@
 #include "GameDataManager.h"
 namespace Utils
 {
-	inline bool isEffectWardPower(RE::EffectSetting* a_effectSetting) {
+	inline bool isWardEffect(RE::EffectSetting* a_effectSetting) {
 		if (!a_effectSetting) {
 			return false;
 		}
@@ -11,11 +11,14 @@ namespace Utils
 	}
 
 	/// <summary>
-	/// Return the ward this actor is currently casting.
+	/// Return the ward data this actor is currently casting, if the actor is casting a ward.
 	/// </summary>
 	/// <param name="a_actor"></param>
 	/// <returns></returns>
-	RE::SpellItem* getCastingWard(RE::Actor* a_actor) {
+	RE::EffectSetting::EffectSettingData* getWardData(RE::Actor* a_actor) {
+		if (a_actor->GetActorValue(RE::ActorValue::kWardPower) == 0) {
+			return nullptr;  //rough filter
+		}
 		for (int i = 0; i < RE::Actor::SlotTypes::kTotal; i++) {
 			auto& magicCaster = a_actor->magicCasters[i];
 			if (!magicCaster) {
@@ -29,15 +32,20 @@ namespace Utils
 			if (!a_actor->IsCasting(spell)) {
 				continue;
 			}
-			
-			for (auto mgef : spell->effects) {
-				if (isEffectWardPower(mgef->baseEffect)) {
-					return spell->As<RE::SpellItem>();
+			//iterate through spell's all effects, trying to find the ward effect.
+			for (auto it = spell->effects.begin(); it != spell->effects.end(); it++) {
+				RE::EffectSetting* baseEffect = (*it)->baseEffect;
+				if (baseEffect && baseEffect->data.primaryAV == RE::ActorValue::kWardPower) {
+					return &baseEffect->data;
 				}
+				it++;
 			}
-			
 		}
 		return nullptr;
+	}
+
+	bool isCastingWard(RE::Actor* a_actor) {
+		return getWardData(a_actor) != nullptr;
 	}
 
 	inline float getWardPower(RE::Actor* a_actor) {

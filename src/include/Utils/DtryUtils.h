@@ -6,6 +6,47 @@
 #define PI 3.1415926535897
 namespace Utils
 {
+	namespace Data
+	{
+		float fDiffMultHPByPCVE;
+		float fDiffMultHPByPCE;
+		float fDiffMultHPByPCN;
+		float fDiffMultHPByPCH;
+		float fDiffMultHPByPCVH;
+		float fDiffMultHPByPCL;
+		float fDiffMultHPToPCVE;
+		float fDiffMultHPToPCE;
+		float fDiffMultHPToPCN;
+		float fDiffMultHPToPCH;
+		float fDiffMultHPToPCVH;
+		float fDiffMultHPToPCL;
+
+		float fCombatHitConeAngle;
+
+		void cache() {
+			auto settings = RE::GameSettingCollection::GetSingleton();
+			fDiffMultHPByPCVE = settings->GetSetting("fDiffMultHPByPCVE")->GetFloat();
+			fDiffMultHPByPCE = settings->GetSetting("fDiffMultHPByPCE")->GetFloat();
+			fDiffMultHPByPCN = settings->GetSetting("fDiffMultHPByPCN")->GetFloat();
+			fDiffMultHPByPCH = settings->GetSetting("fDiffMultHPByPCH")->GetFloat();
+			fDiffMultHPByPCVH = settings->GetSetting("fDiffMultHPByPCVH")->GetFloat();
+			fDiffMultHPByPCL = settings->GetSetting("fDiffMultHPByPCL")->GetFloat();
+
+			fDiffMultHPToPCVE = settings->GetSetting("fDiffMultHPToPCVE")->GetFloat();
+			fDiffMultHPToPCE = settings->GetSetting("fDiffMultHPToPCE")->GetFloat();
+			fDiffMultHPToPCN = settings->GetSetting("fDiffMultHPToPCN")->GetFloat();
+			fDiffMultHPToPCH = settings->GetSetting("fDiffMultHPToPCH")->GetFloat();
+			fDiffMultHPToPCVH = settings->GetSetting("fDiffMultHPToPCVH")->GetFloat();
+			fDiffMultHPToPCL = settings->GetSetting("fDiffMultHPToPCL")->GetFloat();
+
+			fCombatHitConeAngle = settings->GetSetting("fCombatHitConeAngle")->GetFloat();
+		}
+	}
+
+	void init()
+	{
+		Data::cache();
+	}
 
 	namespace Helpers
 	{
@@ -375,52 +416,66 @@ namespace Utils
 		if ((aggressor) && (aggressor->IsPlayerRef() || aggressor->IsPlayerTeammate())) {
 			switch (RE::PlayerCharacter::GetSingleton()->difficulty) {
 			case RE::DIFFICULTY::kNovice:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPByPCVE;
+				damage *= Data::fDiffMultHPByPCVE;
 				break;
 			case RE::DIFFICULTY::kApprentice:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPByPCE;
+				damage *= Data::fDiffMultHPByPCE;
 				break;
 			case RE::DIFFICULTY::kAdept:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPByPCN;
+				damage *= Data::fDiffMultHPByPCN;
 				break;
 			case RE::DIFFICULTY::kExpert:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPByPCH;
+				damage *= Data::fDiffMultHPByPCH;
 				break;
 			case RE::DIFFICULTY::kMaster:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPByPCVH;
+				damage *= Data::fDiffMultHPByPCVH;
 				break;
 			case RE::DIFFICULTY::kLegendary:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPByPCL;
+				damage *= Data::fDiffMultHPByPCL;
 				break;
 			}
 		} else if ((victim) && (victim->IsPlayerRef() || victim->IsPlayerTeammate())) {
 			switch (RE::PlayerCharacter::GetSingleton()->difficulty) {
 			case RE::DIFFICULTY::kNovice:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPToPCVE;
+				damage *= Data::fDiffMultHPToPCVE;
 				break;
 			case RE::DIFFICULTY::kApprentice:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPToPCE;
+				damage *= Data::fDiffMultHPToPCE;
 				break;
 			case RE::DIFFICULTY::kAdept:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPToPCN;
+				damage *= Data::fDiffMultHPToPCN;
 				break;
 			case RE::DIFFICULTY::kExpert:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPToPCH;
+				damage *= Data::fDiffMultHPToPCH;
 				break;
 			case RE::DIFFICULTY::kMaster:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPToPCVH;
+				damage *= Data::fDiffMultHPToPCVH;
 				break;
 			case RE::DIFFICULTY::kLegendary:
-				damage *= GameDataManager::GetSingleton()->_cachedGameSettings.fDiffMultHPToPCL;
+				damage *= Data::fDiffMultHPToPCL;
 				break;
 			}
 		}
 	}
 
+	/// <summary>
+	/// calculate the damage of one hit by attacker on the victim using the attacker's current weapon.
+	/// </summary>
+	/// <param name="a_attacker"></param>
+	/// <param name="a_victim"></param>
+	/// <returns></returns>
+	float calculateHitDamage(RE::Actor* a_attacker, RE::Actor* a_victim) {
+		RE::HitData hitData;
+		hitData.Populate(a_attacker, a_victim, a_attacker->GetAttackingWeapon());
+		float damage = hitData.totalDamage;
+		offsetRealDamage(damage, a_attacker, a_victim);
+		return damage;
+	}
+
 	bool isInBlockAngle(RE::Actor* blocker, RE::TESObjectREFR* a_obj)
 	{
 		auto angle = blocker->GetHeadingAngle(a_obj->GetPosition(), false);
-		float settingsAngle = GameDataManager::GetSingleton()->_cachedGameSettings.fCombatHitConeAngle;
+		float settingsAngle = Data::fCombatHitConeAngle;
 		return (angle <= settingsAngle && angle >= settingsAngle);
 	}
 

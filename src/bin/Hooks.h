@@ -2,6 +2,8 @@
 #include "SKSE/Trampoline.h"
 #include "PCH.h"
 #include "Utils.h"
+#include "include/Utils/DtryUtils.h"
+#include "Ward.h"
 namespace Hooks
 {
 	class h_MoveObjectRefrHavok
@@ -47,21 +49,8 @@ namespace Hooks
 	private:
 
 		static void processMeleeCollision(RE::Actor* a_aggressor, RE::Actor* a_victim, std::int64_t a_int1, bool a_bool, void* a_unkptr) {
-			RE::SpellItem* ward = Utils::getCastingWard(a_victim);
-			if (ward) {
-				logger::info("{} is casting ward", a_victim->GetName());
-				RE::HitData hitData;
-				hitData.Populate(a_aggressor, a_victim, a_aggressor->GetAttackingWeapon());
-				float damage = hitData.totalDamage;
-				if (damage > Utils::getWardPower(a_victim)) {
-					Utils::modWardPower(a_victim, damage);
-					a_aggressor->NotifyAnimationGraph("recoillargestart");
-					return;
-				} else {
-					logger::info("not enough ward power to block");
-					Utils::modWardPower(a_victim, damage);
-					//a_victim->NotifyAnimationGraph("staggerStart");
-				}
+			if (Ward::GetSingleton()->processMeleeWardBlock(a_victim, a_aggressor)) {
+				return;
 			}
 			_processMeleeCollision(a_aggressor, a_victim, a_int1, a_bool, a_unkptr);
 		}
